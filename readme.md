@@ -9,6 +9,7 @@
 ## 使用方法
 ### 本地运行
 - 安装 python
+- 下载代码 `git clone https://github.com/aitsc/chatapi-translate.git ; cd chatapi-translate`
 - 安装依赖包 `pip install -r requirements.txt`
 - 将文件 config_example.jsonc 重命名为 config.jsonc
 - 将文件 config.jsonc 中的翻译器密钥更换为你的, 其他参数可以看注释修改
