@@ -21,7 +21,7 @@
             "api_key": "..."
         }
     },
-    "endpoint": "https://chat.openai.com", // chatgpt的api端点,可以是官方的也可以是自己建立的
+    "endpoint": "https://api.openai.com", // chatgpt的api端点,可以是官方的也可以是自己建立的
     "filter": {
         "re": {
             "no_trans": {
