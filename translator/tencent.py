@@ -7,12 +7,13 @@ import hmac
 from urllib.parse import quote
 import base64
 import time
+from aiolimiter import AsyncLimiter
 
 
 class Translator:
     def __init__(self, conf):
         self.conf = conf
-        self.semaphore = asyncio.Semaphore(conf['qps'])
+        self.limiter = AsyncLimiter(conf['qps'], 1)
 
     async def txTrans_async(self, q, appid, secretKey, fromLang='auto', toLang='zh'):
         if not q.strip():
@@ -52,7 +53,7 @@ class Translator:
         params_data = '&'.join(temp_list)
         url_with_args = 'https://tmt.tencentcloudapi.com/?' + params_data
 
-        async with self.semaphore:
+        async with self.limiter:
             async with aiohttp.ClientSession() as session:
                 async with session.get(url_with_args) as response:
                     json_res = await response.json()

@@ -46,8 +46,8 @@ async def completions(request: Request):
         )
     ):
         try:
-            print(headers)
-            print(body)
+            # print(headers)
+            # print(body)
             if body["stream"]:
                 client_stream = client.stream("POST", url, headers=headers, json=body, timeout=360)
                 return EventSourceResponse(response_stream(client_stream), ping=10000)
@@ -132,13 +132,3 @@ async def catch_all(request: Request):
 
 if __name__ == '__main__':
     uvicorn.run(app, host='0.0.0.0', port=7100)
-
-'''测试
-curl -vvv http://127.0.0.1:7100/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer sk-key" \
-  -d '{ "stream": true, 
-    "model": "gpt-3.5-turbo",
-    "messages": [{"role": "system", "content": "你是谁?"}]
-  }'
-'''

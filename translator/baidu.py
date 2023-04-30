@@ -4,12 +4,14 @@ import hashlib
 import random
 import json
 from urllib.parse import quote
+from aiolimiter import AsyncLimiter
 
 
 class Translator:
     def __init__(self, conf):
         self.conf = conf
-        self.semaphore = asyncio.Semaphore(conf['qps'])
+        # self.semaphore = asyncio.Semaphore(conf['qps'])  # 协程并发限制
+        self.limiter = AsyncLimiter(conf['qps'], 1)
 
     async def bdTrans_async(self, q, appid, secretKey, fromLang='auto', toLang='zh'):
         if isinstance(q, str):
@@ -26,7 +28,7 @@ class Translator:
                 myurl = myurl + '?appid=' + appid + '&q=' + \
                     quote(qi) + '&from=' + fromLang + '&to=' + toLang + '&salt=' + str(salt) + '&sign=' + sign
 
-                async with self.semaphore:
+                async with self.limiter:
                     try:
                         async with session.get(f'http://api.fanyi.baidu.com{myurl}') as response:
                             result_all = await response.text()
