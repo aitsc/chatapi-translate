@@ -1,0 +1,45 @@
+{
+    "key_translator": {
+        // 可以针对不同的 OpenAI Key 设定不同的翻译器, 留空就是所有 OpenAI Key 默认的翻译器. OpenAI Key 的格式为 "Bearer sk-..."
+        "": "DeepL" // 翻译器见 translator
+    },
+    "translator": {
+        "百度翻译": {
+            "name": "baidu",
+            "appid": "...",
+            "secretKey": "...",
+            "qps": 1  // 每秒最多发起几次请求
+        },
+        "腾讯翻译": {
+            "name": "tencent",
+            "appid": "...",
+            "secretKey": "...",
+            "qps": 5
+        },
+        "DeepL": {
+            "name": "deepl",
+            "api_key": "..."
+        }
+    },
+    "endpoint": "https://chat.openai.com", // chatgpt的api端点,可以是官方的也可以是自己建立的
+    "filter": {
+        "re": {
+            "no_trans": {
+                // 用正则表达式替换掉助理回复/用户提问中不需要翻译的部分, 翻译后会还原
+                "assistant": "```[^`]+?```(\n|$)",  // 例如不翻译代码可以用: `[^`\n\r]+?`(?=[^`]|$)|```[^`]+?```(\n|$)
+                "user": ""
+            },
+            "del_trans": {
+                // 用正则表达式删除助理回复/用户提问中不需要翻译的部分, 去除一些不需要的标记, 优先级高于 no_trans
+                "assistant": "",
+                "user": ""
+            }
+        },
+        "auto_title_trans": false  // 最后不是用户或者连续两个用户会被判定为自动获取标题, false代表这种情况不进行翻译
+    },
+    "marks": {
+        "user_trans": "=====[提问-翻译]=====\n",  // 将你的提问进行翻译,显示的标题头.需要后续判定不能留空
+        "assistant_trans": "\n\n=====[助理-翻译]=====\n",  // 将助理的回答进行翻译,显示的标题头.需要后续判定不能留空
+        "assistant_answer": "\n\n=====[助理-回答]=====\n"  // 助理的原始回答显示的标题头.需要后续判定不能留空
+    }
+}
