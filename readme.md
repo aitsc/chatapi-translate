@@ -4,10 +4,10 @@
 - 支持流式传输, 多轮对话自动提取英文上下文用于 ChatGPT.
 
 ![chatbox](images/example.png)
-- 支持 百度翻译/腾讯翻译/DeepL/阿里翻译/彩云小译/火山翻译/Google翻译 作为中转翻译器, 本来想直接用 ChatGPT 做翻译器, 不过它经常回答问题而不是翻译问题很难控制～
+- 支持 百度翻译 / 腾讯翻译 / DeepL / 阿里翻译 / 彩云小译 / 火山翻译 / Google翻译 的API作为中转翻译器 (申请后都有免费额度), 本来想直接用 ChatGPT 做翻译器, 不过它经常回答问题而不是翻译问题很难控制～
 
-## 使用方法
-### 本地运行
+## 搭建方法
+### 1. 本地运行
 - 安装 python
 - 下载代码 `git clone https://github.com/aitsc/chatapi-translate.git ; cd chatapi-translate`
 - 安装依赖包 `pip install -r requirements.txt`
@@ -15,7 +15,7 @@
 - 将文件 config.jsonc 中的翻译器密钥更换为你的([申请方法](https://bobtranslate.com/service/)), 其他参数可以看注释修改
 - 运行 `python api.py` (这个文件的最后一行可以修改默认端口号 port)
 
-### 本地测试
+### 2. 本地测试
 ```shell
 export CHATGLM_API_KEY=token1   # 你的 API key
 curl http://127.0.0.1:7100/v1/chat/completions \
@@ -27,7 +27,7 @@ curl http://127.0.0.1:7100/v1/chat/completions \
   }'
 ```
 
-### 反向代理
+### 3. 反向代理
 ```nginx
 # vi /usr/local/nginx/conf/nginx.conf
 http {
@@ -45,3 +45,14 @@ http {
 # /usr/local/nginx/sbin/nginx -s reload
 ```
 配置好就可以在其他第三方客户端上修改 自定义API域名 为自己的域名进行使用了～
+
+## 免搭建体验
+借助 [ChatGPT Next Web](https://github.com/Yidadaa/ChatGPT-Next-Web) 项目自建了一个自动翻译对话的演示站点
+
+有需要的话可直接进行体验: https://chatapi-translate.vercel.app
+
+![chatgpt-next](images/chatgpt-next.png)
+
+可以自动统计每次对话的token数量和官方API价格, 因为用了英文也更节省token～
+
+(使用免费的翻译接口, 可能并发数量和额度有限制, 不建议大量使用)

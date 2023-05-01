@@ -2,6 +2,7 @@ import aiohttp
 import asyncio
 import json
 from aiolimiter import AsyncLimiter
+import re
 
 
 class Translator:
@@ -43,7 +44,11 @@ class Translator:
 
         result = await self.caiyun_translate_async(text, trans_type=trans_type)
         if 'target' in result:
-            return '\n'.join(result['target'])
+            t = '\n'.join(result['target'])
+            # 去除标记符号的前后空格,防止替换问题, 与 utils.generate_random_id 保持一致
+            t = re.sub(r'(?<=\[) (?=[0-9a-zA-Z]{10} \])', '', t)
+            t = re.sub(r'(?<=\[[0-9a-zA-Z]{10}) (?=\])', '', t)
+            return t
         else:
             print(result)
             return None
@@ -51,7 +56,7 @@ class Translator:
 
 # Example usage
 async def main():
-    text = """测试:
+    text = """测试: [YfeIdwzs8f]
 def abc():
     treturn '你好'
 结束"""
