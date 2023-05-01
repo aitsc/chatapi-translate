@@ -9,7 +9,7 @@ import httpx
 from urllib.parse import urlparse
 import logging
 
-from utils import get_global_config, from_messages_get_en, translate_over_filter, response_stream
+from utils import get_global_config, from_messages_get_en, translate_over_filter, response_stream, has_no_trans_trigger, filter_messages_and_trigger
 
 app = FastAPI()
 app.add_middleware(
@@ -32,12 +32,14 @@ async def completions(request: Request):
     headers["host"] = urlparse(url).netloc
     del headers['content-length']
     client = httpx.AsyncClient()
-    # 非流式传输/自动标题的情况不使用翻译
+    # 非流式传输/自动标题/触发词不翻译等情况不使用翻译
     if (
         body is None
         or "stream" not in body
         or not body["stream"]
         or not get_global_config()["filter"]["auto_title_trans"]
+        and has_no_trans_trigger(body["messages"])
+        or "messages" not in body
         and body["messages"]
         and (
             body["messages"][-1]["role"] != "user"
@@ -46,9 +48,9 @@ async def completions(request: Request):
         )
     ):
         try:
-            # print(headers)
-            # print(body)
-            if body["stream"]:
+            if 'messages' in body:
+                body["messages"] = filter_messages_and_trigger(body["messages"])
+            if 'stream' in body and body["stream"]:
                 client_stream = client.stream("POST", url, headers=headers, json=body, timeout=360)
                 return EventSourceResponse(response_stream(client_stream), ping=10000)
             else:

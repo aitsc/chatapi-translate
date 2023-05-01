@@ -45,6 +45,7 @@ async def translate_over_filter(text, translate, role="assistant", restore=True)
     # 过滤文本
     filter_re = get_global_config()['filter']['re']['del_trans'][role]
     text = re.sub(filter_re, '', text) if filter_re else text
+    
     id_origin = []  # [(id,原始字符串),..]
 
     def custom_repl(match_obj):
@@ -87,3 +88,39 @@ async def response_stream(client_stream, modify_func=None):
                     yield json.dumps(d, ensure_ascii=False)
             else:
                 yield json.dumps(data, ensure_ascii=False)
+
+
+def filter_messages_and_trigger(messages):  # 用于不翻译的信息
+    filtered_messages = []
+    no_trans_trigger = get_global_config()['filter']['no_trans_trigger']
+    
+    marks = get_global_config()['marks']
+    u_trans = re.escape(marks["user_trans"])
+    a_answer = re.escape(marks["assistant_answer"])
+    a_trans = re.escape(marks["assistant_trans"])
+    re_end = f'(?={u_trans}|{a_answer}|{a_trans}|$)'
+    
+    for message in messages:
+        if message['role'] != 'assistant':
+            if no_trans_trigger:
+                message['content'] = message['content'].replace(no_trans_trigger, '')
+            filtered_messages.append(message)
+        else:
+            assistant = re.search(f'(?<={a_answer})[\w\W]+?{re_end}', message['content'])
+            if assistant:
+                filtered_messages.append({'role': 'assistant', 'content': assistant.group()})
+            else:
+                filtered_messages.append(message)
+    return filtered_messages
+
+
+def has_no_trans_trigger(messages):
+    no_trans_trigger = get_global_config()['filter']['no_trans_trigger']
+    if not no_trans_trigger:
+        return False
+    for message in messages:
+        if message['role'] == 'assistant':
+            continue
+        if no_trans_trigger in message['content']:
+            return True
+    return False
