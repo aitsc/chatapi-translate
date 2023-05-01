@@ -82,5 +82,7 @@ urllib3==1.26.15
     # via requests
 uvicorn==0.22.0
     # via -r requirements.in
+watchdog==3.0.0
+    # via -r requirements.in
 yarl==1.9.2
     # via aiohttp

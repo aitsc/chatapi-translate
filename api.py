@@ -19,6 +19,7 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
+get_global_config()
 
 
 @app.post("/v1/chat/completions")

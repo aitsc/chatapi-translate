@@ -3,17 +3,47 @@ import re
 import random
 import string
 from translator import get_translator
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+import time
+import logging
 
 global_config = None
+
+
+class ConfigFileHandler(FileSystemEventHandler):
+    def __init__(self, file_path):
+        self.file_path = file_path
+        self.last_modified_time = 0
+
+    def on_modified(self, event):
+        if not event.is_directory and event.src_path == self.file_path:
+            current_time = time.time()
+            if current_time - self.last_modified_time > 2:
+                self.load_config()
+                self.last_modified_time = current_time
+
+    def load_config(self):
+        global global_config
+        try:
+            with open(self.file_path, 'r') as file:
+                global_config = json.load(file)
+                for k, conf in global_config['translator'].items():
+                    global_config['translator'][k] = get_translator(conf)
+                print("Configuration file reloaded.")
+        except BaseException as e:
+            logging.warning('重载配置配置文件失败!', str(e))
 
 
 def get_global_config():
     global global_config
     if global_config is None:
-        with open('config.jsonc', 'r', encoding='utf8') as r:
-            global_config = json.load(r)
-        for k, conf in global_config['translator'].items():
-            global_config['translator'][k] = get_translator(conf)
+        file_path = 'config.jsonc'
+        event_handler = ConfigFileHandler(file_path)
+        event_handler.load_config()
+        observer = Observer()
+        observer.schedule(event_handler, path=file_path, recursive=False)
+        observer.start()
     return global_config
 
 

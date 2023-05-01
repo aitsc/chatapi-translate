@@ -7,3 +7,4 @@ asyncio
 httpx
 aiohttp
 aiolimiter
+watchdog
