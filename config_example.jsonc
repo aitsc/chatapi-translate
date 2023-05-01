@@ -9,7 +9,7 @@
             "name": "baidu",
             "appid": "...",
             "secretKey": "...",
-            "qps": 10  // 每秒最多发起几次请求
+            "qps": 10  // 每秒最多允许发起几次请求
         },
         "腾讯翻译": {
             "name": "tencent",
@@ -31,6 +31,12 @@
             "name": "caiyun",
             "api_key": "...",
             "qps": 100
+        },
+        "火山翻译": {
+            "name": "volcengine",
+            "accessKey": "...",
+            "secretKey": "...",
+            "qps": 10
         }
     },
     "endpoint": "https://api.openai.com", // chatgpt的api端点,可以是官方的也可以是自己建立的
