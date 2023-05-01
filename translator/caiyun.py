@@ -39,12 +39,11 @@ class Translator:
         else:
             trans_type = 'auto2zh'
 
-        if isinstance(text, str):
-            text = [text]
+        text = text.split('\n')
 
         result = await self.caiyun_translate_async(text, trans_type=trans_type)
         if 'target' in result:
-            return result['target'][0]
+            return '\n'.join(result['target'])
         else:
             print(result)
             return None
