@@ -7,9 +7,10 @@ from fastapi.responses import Response
 from fastapi import FastAPI, Request, status, HTTPException
 import httpx
 from urllib.parse import urlparse
+import json
 import logging
 
-from utils import get_global_config, from_messages_get_en, translate_over_filter, response_stream, has_no_trans_trigger, filter_messages_and_trigger
+from utils import get_global_config, from_messages_get_en, translate_over_filter, response_stream, has_no_trans_trigger, filter_messages_and_trigger, generate_stream_response, generate_stream_response_start, generate_random_id
 
 app = FastAPI()
 app.add_middleware(
@@ -36,6 +37,7 @@ async def completions(request: Request):
     # 非流式传输/自动标题/触发词不翻译等情况不使用翻译
     if (
         body is None
+        or "model" not in body
         or "stream" not in body
         or not body["stream"]
         or not get_global_config()["filter"]["auto_title_trans"]
@@ -79,40 +81,51 @@ async def completions(request: Request):
         t_name = get_global_config()['key_translator'][headers['authorization']]
     else:
         t_name = get_global_config()['key_translator']['']
-    translate = get_global_config()['translator'][t_name].translate
-    q_t = await translate_over_filter(question, translate, role="user")  # 翻译
     messages = from_messages_get_en(body["messages"])  # 只取英文部分
+    translate = get_global_config()['translator'][t_name].translate
     # 修改返回信息
     info = {
         'contents': [],  # 返回的内容
-        'first_return': False,  # 第一次构建用户的翻译结果
     }
     marks = get_global_config()['marks']
+    id_str = 'chatcmpl-' + generate_random_id(29, wrap=False)
 
     async def modify_func(data):
-        if 'choices' in data:
+        if 'choices' in data and data['choices']:
             info['contents'] += [c['delta']['content']
-                                 for c in data['choices'] if 'delta' in c and 'content' in c['delta']]
-            # 构建用户的翻译结果
-            if not info['first_return'] and data['choices'] and 'content' in data['choices'][-1]['delta']:
-                prefix = marks["user_trans"] + q_t + marks["assistant_answer"]
-                data['choices'][-1]['delta']['content'] = prefix + data['choices'][-1]['delta']['content']
-                info['first_return'] = True
+                                for c in data['choices'] if 'delta' in c and 'content' in c['delta']]
+            data['model'] = body['model']
+            data['id'] = id_str
             # 停止前再翻译助理
             if data['choices'][0]['finish_reason'] == 'stop':
                 data_ = deepcopy(data)
                 data_['choices'][0]['finish_reason'] = None
                 data_['choices'][0]['delta']['content'] = marks["assistant_trans"]
                 yield data_
-                content = await translate_over_filter(''.join(info['contents']), translate, role="assistant")
-                data_['choices'][0]['delta']['content'] = content
-                yield data_
-        yield data
-    # 构建请求
-    body['messages'] = messages + [{'role': 'user', 'content': q_t}]
-    # print(body)
-    client_stream = client.stream("POST", url, headers=headers, json=body, timeout=360)
-    return EventSourceResponse(response_stream(client_stream, modify_func), ping=10000)
+                async for content in translate_over_filter(''.join(info['contents']), translate, role="assistant"):
+                    data_['choices'][0]['delta']['content'] = content
+                    yield data_
+                yield data
+            elif 'content' in data['choices'][0]['delta']:
+                yield data
+        
+    async def response_func():
+        # 开头
+        yield json.dumps(generate_stream_response_start(id_str, body['model']), ensure_ascii=False)
+        yield json.dumps(generate_stream_response(marks["user_trans"], id_str, body['model']), ensure_ascii=False)
+        q_t_all = ''
+        # 提问翻译
+        async for q_t in translate_over_filter(question, translate, role="user"):
+            q_t_all += q_t
+            yield json.dumps(generate_stream_response(q_t, id_str, body['model']), ensure_ascii=False)
+        yield json.dumps(generate_stream_response(marks["assistant_answer"], id_str, body['model']), ensure_ascii=False)
+        # 构建请求
+        body['messages'] = messages + [{'role': 'user', 'content': q_t_all}]
+        client_stream = client.stream("POST", url, headers=headers, json=body, timeout=360)
+        # 助理回答
+        async for resp in response_stream(client_stream, modify_func):
+            yield resp
+    return EventSourceResponse(response_func(), ping=10000)
 
 
 @app.route("/{full_path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"])

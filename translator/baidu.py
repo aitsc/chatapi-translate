@@ -1,10 +1,10 @@
 import aiohttp
-import asyncio
 import hashlib
 import random
 import json
 from urllib.parse import quote
 from aiolimiter import AsyncLimiter
+from .utils import iter_lines
 
 
 class Translator:
@@ -49,21 +49,9 @@ class Translator:
         return dst_L, numNone
 
     async def translate(self, text, to_english=True):
-        if to_english:
-            return (await self.bdTrans_async(text, self.conf['appid'], self.conf['secretKey'], toLang='en'))[0][0]
-        else:
-            return (await self.bdTrans_async(text, self.conf['appid'], self.conf['secretKey'], toLang='zh'))[0][0]
-
-
-# Example usage
-async def main():
-    text = "你好"
-    conf = {"appid": "your_appid", "secretKey": "your_secret_key", "qps": 1.}
-
-    translator = Translator(conf)
-    translated_text = await translator.translate(text)
-    print(translated_text)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+        for t, t_restore in iter_lines(text, buffer=self.conf['buffer'], leave_blank=False):
+            if to_english:
+                t = (await self.bdTrans_async(t, self.conf['appid'], self.conf['secretKey'], toLang='en'))[0][0]
+            else:
+                t = (await self.bdTrans_async(t, self.conf['appid'], self.conf['secretKey'], toLang='zh'))[0][0]
+            yield t_restore(t)

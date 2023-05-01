@@ -1,5 +1,4 @@
 import aiohttp
-import asyncio
 import json
 import hmac
 import hashlib
@@ -7,6 +6,7 @@ import base64
 from aiolimiter import AsyncLimiter
 import uuid
 import datetime
+from .utils import iter_lines
 
 
 class Translator:
@@ -90,28 +90,9 @@ class Translator:
         return translated_texts, num_none
 
     async def translate(self, text, to_english=True):
-        if to_english:
-            return (await self.ali_translate_async(text, target_language='en'))[0][0]
-        else:
-            return (await self.ali_translate_async(text, target_language='zh'))[0][0]
-
-
-# Example usage
-async def main():
-    text = """测试:
-def abc():
-    treturn '你好'
-结束"""
-    conf = {
-        "appid": "your_access_key_id",
-        "secretKey": "your_access_key_secret",
-        "qps": 1.
-    }
-
-    translator = Translator(conf)
-    translated_text = await translator.translate(text)
-    print(translated_text)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+        for t, t_restore in iter_lines(text, buffer=self.conf['buffer'], leave_blank=False):
+            if to_english:
+                t = (await self.ali_translate_async(t, target_language='en'))[0][0]
+            else:
+                t = (await self.ali_translate_async(t, target_language='zh'))[0][0]
+            yield t_restore(t)

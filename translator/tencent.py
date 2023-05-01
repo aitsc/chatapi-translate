@@ -1,6 +1,5 @@
 import base64
 import aiohttp
-import asyncio
 import hashlib
 import random
 import hmac
@@ -8,6 +7,7 @@ from urllib.parse import quote
 import base64
 import time
 from aiolimiter import AsyncLimiter
+from .utils import iter_lines
 
 
 class Translator:
@@ -68,21 +68,9 @@ class Translator:
         return trans_text
 
     async def translate(self, text, to_english=True):
-        if to_english:
-            return await self.txTrans_async(text, self.conf['appid'], self.conf['secretKey'], toLang='en')
-        else:
-            return await self.txTrans_async(text, self.conf['appid'], self.conf['secretKey'], toLang='zh')
-
-
-# Example usage
-async def main():
-    text = "你好"
-    conf = {"appid": "your_appid", "secretKey": "your_secret_key", "qps": 1.}
-
-    translator = Translator(conf)
-    translated_text = await translator.translate(text)
-    print(translated_text)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+        for t, t_restore in iter_lines(text, buffer=self.conf['buffer'], leave_blank=False):
+            if to_english:
+                t = await self.txTrans_async(t, self.conf['appid'], self.conf['secretKey'], toLang='en')
+            else:
+                t = await self.txTrans_async(t, self.conf['appid'], self.conf['secretKey'], toLang='zh')
+            yield t_restore(t)

@@ -1,8 +1,8 @@
 import aiohttp
-import asyncio
 import json
 from aiolimiter import AsyncLimiter
 import re
+from .utils import iter_lines
 
 
 class Translator:
@@ -40,32 +40,15 @@ class Translator:
         else:
             trans_type = 'auto2zh'
 
-        text = text.split('\n')
-
-        result = await self.caiyun_translate_async(text, trans_type=trans_type)
-        if 'target' in result:
-            t = '\n'.join(result['target'])
-            # 去除标记符号的前后空格,防止替换问题, 与 utils.generate_random_id 保持一致
-            t = re.sub(r'(?<=\[) (?=[0-9a-zA-Z]{10} \])', '', t)
-            t = re.sub(r'(?<=\[[0-9a-zA-Z]{10}) (?=\])', '', t)
-            return t
-        else:
-            print(result)
-            return None
-
-
-# Example usage
-async def main():
-    text = """测试: [YfeIdwzs8f]
-def abc():
-    treturn '你好'
-结束"""
-    conf = {"api_key": "your_token", "qps": 1.}
-
-    translator = Translator(conf)
-    translated_text = await translator.translate(text)
-    print(translated_text)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+        for t, t_restore in iter_lines(text, buffer=self.conf['buffer'], leave_blank=False):
+            t = t.split('\n')
+            result = await self.caiyun_translate_async(t, trans_type=trans_type)
+            if 'target' in result:
+                t = '\n'.join(result['target'])
+                # 去除标记符号的前后空格,防止替换问题, 与 utils.generate_random_id 保持一致
+                t = re.sub(r'(?<=\[) (?=[0-9a-zA-Z]{10} \])', '', t)
+                t = re.sub(r'(?<=\[[0-9a-zA-Z]{10}) (?=\])', '', t)
+            else:
+                print(result)
+                t = ''
+            yield t_restore(t)

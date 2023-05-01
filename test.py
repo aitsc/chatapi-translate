@@ -5,25 +5,31 @@ from pprint import pprint
 
 async def main():
     print('=====测试: translator')
-    text_to_translate = '''测试: [YfeIdwzs8f]
+    text_to_translate = '''这是一个测试: [YfeIdwzs8f]
+[YfeIdwzs8f]
 def abc():
+
     return '你好'
 结束
 '''
     text_to_translate_en = '''test: [YfeIdwzs8f]
+[YfeIdwzs8f]
 def abc():
+
     return 'hello'
 end
 '''
     for name, translator in get_global_config()['translator'].items():
+        if name != '火山翻译':
+            continue
         print(name, '- to_english:')
         translate = translator.translate
-        translated_text = await translate(text_to_translate)
+        translated_text = ''.join([i async for i in translate(text_to_translate)])
         print(translated_text)
         print('-' * 10)
         print(name, ':')
         translate = translator.translate
-        translated_text = await translate(text_to_translate_en, to_english=False)
+        translated_text = ''.join([i async for i in translate(text_to_translate_en, to_english=False)])
         print(translated_text)
         print('-' * 20)
         
@@ -50,10 +56,10 @@ end
     pprint(messages_en)
 
     print('=====测试: translator_over_filter')
-    text = 'Hello my world! `123`  ```abc``` '
-    text = await translate_over_filter(text, translate=None)
+    text = 'Hello my world! `123`  ```abc```\nhi'
+    text = ''.join([i async for i in translate_over_filter(text, translate=None)])
     print(text)
-    text = await translate_over_filter(text, translate=translate, role="assistant")
+    text = ''.join([i async for i in translate_over_filter(text, translate=translate)])
     print(text)
 
 

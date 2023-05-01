@@ -1,6 +1,6 @@
 import aiohttp
-import asyncio
 from aiolimiter import AsyncLimiter
+from .utils import iter_lines
 
 
 class Translator:
@@ -27,24 +27,9 @@ class Translator:
                     return translated_text
 
     async def translate(self, text, to_english=True):
-        if to_english:
-            return await self.translate_text(text, 'EN', self.conf['api_key'])
-        else:
-            return await self.translate_text(text, 'ZH', self.conf['api_key'])
-
-
-# Example usage
-async def main():
-    text = """测试:
-def abc():
-    treturn '你好'
-结束"""
-    conf = {"api_key": "your_api_key", "qps": 1.}
-    translator = Translator(conf)
-
-    translated_text = await translator.translate(text)
-    print(translated_text)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+        for t, t_restore in iter_lines(text, buffer=self.conf['buffer'], leave_blank=True):
+            if to_english:
+                t = await self.translate_text(t, 'EN', self.conf['api_key'])
+            else:
+                t = await self.translate_text(t, 'ZH', self.conf['api_key'])
+            yield t_restore(t)

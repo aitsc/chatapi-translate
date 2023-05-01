@@ -67,15 +67,18 @@ def from_messages_get_en(messages):
     return messages_en
 
 
-def generate_random_id(length=10):
-    return '[' + ''.join(random.choices(string.ascii_letters + string.digits, k=length)) + ']'
+def generate_random_id(length=10, wrap=True):
+    s = ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+    if wrap:
+        return '[' + s + ']'
+    else:
+        return s
 
 
-async def translate_over_filter(text, translate, role="assistant", restore=True):
+async def translate_over_filter(text, translate, role="assistant"):
     # 过滤文本
     filter_re = get_global_config()['filter']['re']['del_trans'][role]
     text = re.sub(filter_re, '', text) if filter_re else text
-    
     id_origin = []  # [(id,原始字符串),..]
 
     def custom_repl(match_obj):
@@ -85,21 +88,19 @@ async def translate_over_filter(text, translate, role="assistant", restore=True)
         return id_  # 返回要替换的字符串
     filter_re = get_global_config()['filter']['re']['no_trans'][role]
     filtered_text = re.sub(filter_re, custom_repl, text) if filter_re else text
+
+    def text_restore(t):  # 还原翻译前的过滤文本
+        for id_, sub in id_origin:
+            t = t.replace(id_, sub)
+        return t
     # 翻译
     if translate is not None:
         to_english = role != "assistant"
-        translated_text = await translate(filtered_text, to_english=to_english)
+        async for translated_text in translate(filtered_text, to_english=to_english):
+            yield text_restore(translated_text)
     else:
         print(filtered_text)  # 测试
-        translated_text = filtered_text
-    # 还原翻译前的过滤文本
-    final_text = translated_text
-    for id_, sub in id_origin:
-        if restore:
-            final_text = final_text.replace(id_, sub)
-        else:
-            final_text = final_text.replace(id_, '')
-    return final_text
+        yield text_restore(filtered_text)
 
 
 async def response_stream(client_stream, modify_func=None):
@@ -115,7 +116,8 @@ async def response_stream(client_stream, modify_func=None):
             data = json.loads(line)
             if modify_func is not None:
                 async for d in modify_func(data):
-                    yield json.dumps(d, ensure_ascii=False)
+                    if d:
+                        yield json.dumps(d, ensure_ascii=False)
             else:
                 yield json.dumps(data, ensure_ascii=False)
 
@@ -123,13 +125,13 @@ async def response_stream(client_stream, modify_func=None):
 def filter_messages_and_trigger(messages):  # 用于不翻译的信息
     filtered_messages = []
     no_trans_trigger = get_global_config()['filter']['no_trans_trigger']
-    
+
     marks = get_global_config()['marks']
     u_trans = re.escape(marks["user_trans"])
     a_answer = re.escape(marks["assistant_answer"])
     a_trans = re.escape(marks["assistant_trans"])
     re_end = f'(?={u_trans}|{a_answer}|{a_trans}|$)'
-    
+
     for message in messages:
         if message['role'] != 'assistant':
             if no_trans_trigger:
@@ -144,7 +146,7 @@ def filter_messages_and_trigger(messages):  # 用于不翻译的信息
     return filtered_messages
 
 
-def has_no_trans_trigger(messages):
+def has_no_trans_trigger(messages):  # 判断是否不要翻译
     no_trans_trigger = get_global_config()['filter']['no_trans_trigger']
     if not no_trans_trigger:
         return False
@@ -154,3 +156,19 @@ def has_no_trans_trigger(messages):
         if no_trans_trigger in message['content']:
             return True
     return False
+
+
+def generate_stream_response_start(id_str, model_name='gpt-3.5-turbo'):
+    ret = {"id": id_str, "object": "chat.completion.chunk", "created": int(
+        time.time()), "model": model_name, "choices": [{"delta": {"role": "assistant"}, "index": 0, "finish_reason": None}]}
+    return ret
+
+
+def generate_stream_response(content: str, id_str, model_name='gpt-3.5-turbo'):
+    ret = {
+        "id": id_str,
+        "object": "chat.completion.chunk",
+        "created": int(time.time()),
+        "model": model_name,
+        "choices": [{"delta": {"content": content}, "index": 0, "finish_reason": None}]}
+    return ret

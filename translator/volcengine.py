@@ -1,11 +1,11 @@
 import aiohttp
-import asyncio
 import hashlib
 import hmac
 import json
 from aiolimiter import AsyncLimiter
 from datetime import datetime
 from urllib.parse import quote
+from .utils import iter_lines
 
 
 class SignerV4(object):
@@ -122,29 +122,11 @@ class Translator:
 
     async def translate(self, text, to_english=True):
         target_lang = 'en' if to_english else 'zh'
-        response = await self.volcengine_translate_async([text], target_lang=target_lang)
-        try:
-            return response['TranslationList'][0]['Translation']
-        except:
-            print(response)
-            return None
-
-
-async def main():
-    text = """这是一个测试:
-def abc():
-    treturn '你好'
-结束"""
-    conf = {
-        "accessKey": "your_access_key",
-        "secretKey": "your_secret_key",
-        "qps": 1
-    }
-
-    translator = Translator(conf)
-    translated_text = await translator.translate(text)
-    print(translated_text)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+        for t, t_restore in iter_lines(text, buffer=self.conf['buffer'], leave_blank=False):
+            response = await self.volcengine_translate_async([t], target_lang=target_lang)
+            try:
+                t = response['TranslationList'][0]['Translation']
+            except:
+                print(response)
+                t = ''
+            yield t_restore(t)
