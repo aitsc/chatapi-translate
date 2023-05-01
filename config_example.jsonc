@@ -37,6 +37,11 @@
             "accessKey": "...",
             "secretKey": "...",
             "qps": 10
+        },
+        "Google翻译": {
+            "name": "google",
+            "api_key": "...",
+            "qps": 10
         }
     },
     "endpoint": "https://api.openai.com", // chatgpt的api端点,可以是官方的也可以是自己建立的
