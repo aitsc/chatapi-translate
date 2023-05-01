@@ -19,7 +19,8 @@
         },
         "DeepL": {
             "name": "deepl",
-            "api_key": "..."
+            "api_key": "...",
+            "qps": 100
         },
         "阿里翻译": {
             "name": "ali",
