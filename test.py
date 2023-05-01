@@ -5,14 +5,17 @@ from pprint import pprint
 
 async def main():
     print('=====测试: translator')
-    text_to_translate = '''
-这是代码：[YfeIdwzs8f] 你好
+    text_to_translate = '''测试: [YfeIdwzs8f]
+def abc():
+    return '你好'
+结束
 '''
     for name, translator in get_global_config()['translator'].items():
         print(name, ':')
         translate = translator.translate
         translated_text = await translate(text_to_translate)
         print(translated_text)
+        print()
         
     print('=====测试: from_messages_get_en')
     marks = get_global_config()['marks']

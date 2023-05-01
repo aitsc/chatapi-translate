@@ -1,14 +1,15 @@
 {
     "key_translator": {
         // 可以针对不同的 OpenAI Key 设定不同的翻译器, 留空就是所有 OpenAI Key 默认的翻译器. OpenAI Key 的格式为 "Bearer sk-..."
-        "": "DeepL" // 翻译器见 translator
+        "": "DeepL", // 支持的翻译器见 translator
+        "Bearer sk-...": "百度翻译"
     },
     "translator": {
         "百度翻译": {
             "name": "baidu",
             "appid": "...",
             "secretKey": "...",
-            "qps": 1  // 每秒最多发起几次请求
+            "qps": 10  // 每秒最多发起几次请求
         },
         "腾讯翻译": {
             "name": "tencent",
@@ -19,13 +20,24 @@
         "DeepL": {
             "name": "deepl",
             "api_key": "..."
+        },
+        "阿里翻译": {
+            "name": "ali",
+            "appid": "...",
+            "secretKey": "...",
+            "qps": 50
+        },
+        "彩云小译": {
+            "name": "caiyun",
+            "api_key": "...",
+            "qps": 100
         }
     },
     "endpoint": "https://api.openai.com", // chatgpt的api端点,可以是官方的也可以是自己建立的
     "filter": {
         "re": {
             "no_trans": {
-                // 用正则表达式替换掉助理回复/用户提问中不需要翻译的部分, 翻译后会还原
+                // 用正则表达式替换掉助理回复/用户提问中不需要翻译的部分, 翻译后会还原. 例如有的代码翻译完可能缩进就没了
                 "assistant": "```[^`]+?```(\n|$)",  // 例如不翻译代码可以用: `[^`\n\r]+?`(?=[^`]|$)|```[^`]+?```(\n|$)
                 "user": ""
             },

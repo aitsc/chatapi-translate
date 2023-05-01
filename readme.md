@@ -4,7 +4,7 @@
 - 支持流式传输, 多轮对话自动提取英文上下文用于 ChatGPT.
 
 ![chatbox](images/example.png)
-- 支持百度翻译/腾讯翻译/DeepL作为中转翻译器, 本来想直接用 ChatGPT 做翻译器, 不过它经常回答问题而不是翻译问题很难控制～
+- 支持 百度翻译/腾讯翻译/DeepL/阿里翻译/彩云小译 作为中转翻译器, 本来想直接用 ChatGPT 做翻译器, 不过它经常回答问题而不是翻译问题很难控制～
 
 ## 使用方法
 ### 本地运行
@@ -12,7 +12,7 @@
 - 下载代码 `git clone https://github.com/aitsc/chatapi-translate.git ; cd chatapi-translate`
 - 安装依赖包 `pip install -r requirements.txt`
 - 将文件 config_example.jsonc 重命名为 config.jsonc
-- 将文件 config.jsonc 中的翻译器密钥更换为你的, 其他参数可以看注释修改
+- 将文件 config.jsonc 中的翻译器密钥更换为你的([申请方法](https://bobtranslate.com/service/)), 其他参数可以看注释修改
 - 运行 `python api.py` (这个文件的最后一行可以修改默认端口号 port)
 
 ### 本地测试
