@@ -67,8 +67,12 @@ def from_messages_get_en(messages):
     return messages_en
 
 
-def generate_random_id(length=10, wrap=True):
-    s = ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+def generate_random_id(length=10, wrap=True, only_digits=False):
+    if only_digits:
+        ss = string.digits
+    else:
+        ss = string.ascii_letters + string.digits
+    s = ''.join(random.choices(ss, k=length))
     if wrap:
         return '[' + s + ']'
     else:
@@ -83,7 +87,7 @@ async def translate_over_filter(text, translate, role="assistant"):
 
     def custom_repl(match_obj):
         matched_substring = match_obj.group()
-        id_ = generate_random_id(10)
+        id_ = generate_random_id(10, only_digits=True)
         id_origin.append((id_, matched_substring))
         return id_  # 返回要替换的字符串
     filter_re = get_global_config()['filter']['re']['no_trans'][role]

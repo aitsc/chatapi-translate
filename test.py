@@ -5,23 +5,21 @@ from pprint import pprint
 
 async def main():
     print('=====测试: translator')
-    text_to_translate = '''这是一个测试: [YfeIdwzs8f]
-[YfeIdwzs8f]
+    text_to_translate = '''这是一个测试: [0123456789]
+[0123456789]
 def abc():
 
     return '你好'
 结束
 '''
-    text_to_translate_en = '''test: [YfeIdwzs8f]
-[YfeIdwzs8f]
+    text_to_translate_en = '''test: [0123456789]
+[0123456789]
 def abc():
 
     return 'hello'
 end
 '''
     for name, translator in get_global_config()['translator'].items():
-        if name != '火山翻译':
-            continue
         print(name, '- to_english:')
         translate = translator.translate
         translated_text = ''.join([i async for i in translate(text_to_translate)])
