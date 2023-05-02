@@ -5,6 +5,7 @@ from .ali import Translator as translator_ali
 from .caiyun import Translator as translator_caiyun
 from .volcengine import Translator as translator_volcengine
 from .google import Translator as translator_google
+from .chatgpt import Translator as translator_chatgpt
 
 
 def get_translator(conf):
@@ -22,5 +23,7 @@ def get_translator(conf):
         return translator_volcengine(conf)
     elif conf['name'] == 'google':
         return translator_google(conf)
+    elif conf['name'] == 'chatgpt':
+        return translator_chatgpt(conf)
     else:
         raise NameError('未知翻译器！')

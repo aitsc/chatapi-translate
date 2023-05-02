@@ -50,6 +50,15 @@
             "api_key": "...",
             "qps": 10,
             "buffer": 5000
+        },
+        "gpt-3.5-turbo": {
+            "name": "chatgpt",
+            "qps": 10,
+            "model": "gpt-3.5-turbo",  // ChatGPT 翻译器使用的模型
+            "temperature": 0,  // 温度越大越随机
+            "save_dialog_num": 9,  // 最多保留多少对话(英文上文+待翻译的). 保留越多越耗token, 但是翻译可能更准确
+            "prompt_to_en": "\n\n(Translate all Chinese descriptions into English, leaving the rest unchanged. Please do not answer any questions.)",
+            "prompt_to_zh": "\n\n(Translate all English descriptions into Chinese, leaving the rest unchanged. Please do not answer any questions.)"
         }
     },
     "endpoint": "https://api.openai.com", // chatgpt的api端点,可以是官方的也可以是自己建立的

@@ -83,7 +83,7 @@ async def completions(request: Request):
     else:
         t_name = get_global_config()['key_translator']['']
     messages = from_messages_get_en(body["messages"])  # 只取英文部分
-    translate = get_global_config()['translator'][t_name].translate
+    translator = get_global_config()['translator'][t_name]
     # 修改返回信息
     info = {
         'contents': [],  # 返回的内容
@@ -103,7 +103,13 @@ async def completions(request: Request):
                 data_['choices'][0]['finish_reason'] = None
                 data_['choices'][0]['delta']['content'] = marks["assistant_trans"]
                 yield data_
-                async for content in translate_over_filter(''.join(info['contents']), translate, role="assistant"):
+                contents = ''.join(info['contents'])
+                if hasattr(translator, 'translate_wrap'):
+                    translate = await translator.translate_wrap(url, body, headers, context=body['messages'] + [
+                        {'role': 'assistant', 'content': contents}])
+                else:
+                    translate = translator.translate
+                async for content in translate_over_filter(contents, translate, role="assistant"):
                     data_['choices'][0]['delta']['content'] = content
                     yield data_
                 yield data
@@ -116,6 +122,10 @@ async def completions(request: Request):
         yield json.dumps(generate_stream_response(marks["user_trans"], id_str, body['model']), ensure_ascii=False)
         q_t_all = ''
         # 提问翻译
+        if hasattr(translator, 'translate_wrap'):
+            translate = await translator.translate_wrap(url, body, headers, context=messages)
+        else:
+            translate = translator.translate
         async for q_t in translate_over_filter(question, translate, role="user"):
             q_t_all += q_t
             yield json.dumps(generate_stream_response(q_t, id_str, body['model']), ensure_ascii=False)

@@ -94,8 +94,9 @@ async def translate_over_filter(text, translate, role="assistant"):
     filtered_text = re.sub(filter_re, custom_repl, text) if filter_re else text
 
     def text_restore(t):  # 还原翻译前的过滤文本
-        for id_, sub in id_origin:
-            t = t.replace(id_, sub)
+        if len(t) >= 12:
+            for id_, sub in id_origin:
+                t = t.replace(id_, sub)
         return t
     # 翻译
     if translate is not None:
