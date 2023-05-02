@@ -13,7 +13,7 @@
 - 安装依赖包 `pip install -r requirements.txt`
 - 将文件 config_example.jsonc 重命名为 config.jsonc
 - 将文件 config.jsonc 中的翻译器密钥更换为你的([申请方法](https://bobtranslate.com/service/)), 其他参数可以看注释修改
-- 运行 `python api.py` (这个文件的最后一行可以修改默认端口号 port)
+- 运行 `python api.py --port 7100`
 
 ### 2. 本地测试
 ```shell

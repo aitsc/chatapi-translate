@@ -8,6 +8,7 @@ from fastapi import FastAPI, Request, status, HTTPException
 import httpx
 from urllib.parse import urlparse
 import json
+import argparse
 import logging
 
 from utils import get_global_config, from_messages_get_en, translate_over_filter, response_stream, has_no_trans_trigger, filter_messages_and_trigger, generate_stream_response, generate_stream_response_start, generate_random_id
@@ -147,4 +148,8 @@ async def catch_all(request: Request):
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='0.0.0.0', port=7100)
+    parser = argparse.ArgumentParser(description='Run the web server with specified port.')
+    parser.add_argument('--host', type=str, default='0.0.0.0', help='Host address to run the server on (default: 0.0.0.0)')
+    parser.add_argument('--port', type=int, default=7100, help='Port number to run the server on (default: 7100)')
+    args = parser.parse_args()
+    uvicorn.run(app, host=args.host, port=args.port)
