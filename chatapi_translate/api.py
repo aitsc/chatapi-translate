@@ -166,7 +166,7 @@ def main():
                         help='configuration file path, content format reference: https://github.com/aitsc/chatapi-translate/blob/master/config_example.jsonc')
     args = parser.parse_args()
     if not os.path.exists(args.config):
-        print('缺少配置文件, 请参考: https://github.com/aitsc/chatapi-translate/blob/master/config_example.jsonc')
+        print('需要用 --config 命令行参数指定存在的配置文件路径!\n样例模版请参考: https://github.com/aitsc/chatapi-translate/blob/master/config_example.jsonc')
         return
     get_global_config(args.config)
     uvicorn.run(app, host=args.host, port=args.port)

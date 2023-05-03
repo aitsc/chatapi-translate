@@ -111,6 +111,7 @@ async def translate_over_filter(text, translate, role="assistant"):
 async def response_stream(client_stream, modify_func=None):
     async with client_stream as response:
         async for line in response.aiter_lines():
+            line = line.strip()
             if not line or line is None:
                 continue
             if line.startswith("data: "):

@@ -8,6 +8,8 @@
 - 支持直接使用 ChatGPT 翻译, 不过它经常回答问题而不是翻译问题[很难控制](images/chatgpt-trans.png), 大家要能找到好的prompt可以分享一下 (见配置示例)
   - 如果肯用 gpt-4 做翻译器, 翻译效果应该还是挺好的
 - 不想使用翻译的时候可以输入 "--不翻译\n" (见配置文件)
+- 支持 MacOS / Windows / Linux 全平台
+- 因为会先输出英文回答, 还可以顺便学学英语～
 
 ## 搭建方法
 ### 1. 本地运行
@@ -16,8 +18,9 @@
 - 下载配置文件 [config_example.jsonc](https://github.com/aitsc/chatapi-translate/blob/master/config_example.jsonc) 并重命名为 `config.jsonc`
 - 将 `config.jsonc` 中的翻译器密钥更换为你的([申请方法](https://bobtranslate.com/service/)), 其他参数可以看注释修改
 - 配置文件同目录下运行: `chatapi-translate --port 7100`
+- 现在你可以用 `http://127.0.0.1:7100` 替换 `https://api.openai.com` 的API域名在本地进行使用了, 例如你可以使用客户端 [chatbox](https://github.com/Bin-Huang/chatbox/releases)
 
-### 2. 本地测试
+### 2. 命令行测试
 ```shell
 export CHATGLM_API_KEY=token1   # 你的 API key
 curl http://127.0.0.1:7100/v1/chat/completions \
