@@ -20,13 +20,14 @@ def abc():
 end
 '''
     for name, translator in get_global_config()['translator'].items():
-        print(name, '- to_english:')
+        if hasattr(translator, 'translate_wrap'):
+            continue
         translate = translator.translate
+        print(name, '- to_english:')
         translated_text = ''.join([i async for i in translate(text_to_translate)])
         print(translated_text)
         print('-' * 10)
         print(name, ':')
-        translate = translator.translate
         translated_text = ''.join([i async for i in translate(text_to_translate_en, to_english=False)])
         print(translated_text)
         print('-' * 20)
