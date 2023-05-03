@@ -2,11 +2,12 @@ import commentjson as json
 import re
 import random
 import string
-from translator import get_translator
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import time
 import logging
+
+from .translator import get_translator
 
 global_config = None
 
@@ -26,7 +27,7 @@ class ConfigFileHandler(FileSystemEventHandler):
     def load_config(self):
         global global_config
         try:
-            with open(self.file_path, 'r') as file:
+            with open(self.file_path, 'r', encoding='utf8') as file:
                 global_config = json.load(file)
                 for k, conf in global_config['translator'].items():
                     global_config['translator'][k] = get_translator(conf)
@@ -35,10 +36,9 @@ class ConfigFileHandler(FileSystemEventHandler):
             logging.warning('重载配置配置文件失败!', str(e))
 
 
-def get_global_config():
+def get_global_config(file_path='config.jsonc'):
     global global_config
     if global_config is None:
-        file_path = 'config.jsonc'
         event_handler = ConfigFileHandler(file_path)
         event_handler.load_config()
         observer = Observer()

@@ -1,4 +1,4 @@
-from utils import get_global_config, translate_over_filter, from_messages_get_en
+from chatapi_translate.utils import get_global_config, translate_over_filter, from_messages_get_en
 import asyncio
 from pprint import pprint
 

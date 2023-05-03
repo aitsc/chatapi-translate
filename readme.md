@@ -11,12 +11,11 @@
 
 ## 搭建方法
 ### 1. 本地运行
-- 安装 python
-- 下载代码 `git clone https://github.com/aitsc/chatapi-translate.git ; cd chatapi-translate`
-- 安装依赖包 `pip install -r requirements.txt`
-- 将文件 config_example.jsonc 重命名为 config.jsonc
-- 将文件 config.jsonc 中的翻译器密钥更换为你的([申请方法](https://bobtranslate.com/service/)), 其他参数可以看注释修改
-- 运行 `python api.py --port 7100`
+- 安装 `python 3`
+- 安装包 `pip3 install --upgrade chatapi-translate`
+- 下载配置文件 [config_example.jsonc](https://github.com/aitsc/chatapi-translate/blob/master/config_example.jsonc) 并重命名为 `config.jsonc`
+- 将 `config.jsonc` 中的翻译器密钥更换为你的([申请方法](https://bobtranslate.com/service/)), 其他参数可以看注释修改
+- 配置文件同目录下运行: `chatapi-translate --port 7100`
 
 ### 2. 本地测试
 ```shell

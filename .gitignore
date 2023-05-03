@@ -1,2 +1,5 @@
 config.jsonc
 __pycache__
+dist/
+build/
+*.egg-info/
