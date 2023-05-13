@@ -1,6 +1,8 @@
 # chatapi-translate
 ## 功能
 - ChatGPT 通常英文对话效果比较好, 但是英文水平不行的话来回翻译比较麻烦, 这个项目通过包裹 OpenAI API 接口实现自动调用翻译器来翻译你的提问和助理的回答.
+  - 英文靠谱例子：https://shareg.pt/jVBkjbD
+  - 中文不靠谱例子(最后一次回答不对)：https://shareg.pt/YfhCTDn
 - 支持流式传输, 多轮对话自动提取英文上下文用于 ChatGPT.
 
 ![chatbox](images/example.png)
