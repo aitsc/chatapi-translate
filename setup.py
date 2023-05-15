@@ -9,7 +9,7 @@ else:
 
 setup(
     name='chatapi-translate',
-    version='0.5',
+    version='0.6',
     description="ChatGPT OpenAI API 流式反向代理，自动翻译中文到英文对话，实现用英文进行高质量的对话",
     long_description=long_description,
     long_description_content_type="text/markdown",

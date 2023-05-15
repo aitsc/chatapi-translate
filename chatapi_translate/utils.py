@@ -131,6 +131,7 @@ async def response_stream(client_stream, modify_func=None):
 def filter_messages_and_trigger(messages):  # 用于不翻译的信息
     filtered_messages = []
     no_trans_trigger = get_global_config()['filter']['no_trans_trigger']
+    trans_trigger = get_global_config()['filter']['trans_trigger']
 
     marks = get_global_config()['marks']
     u_trans = re.escape(marks["user_trans"])
@@ -142,6 +143,8 @@ def filter_messages_and_trigger(messages):  # 用于不翻译的信息
         if message['role'] != 'assistant':
             if no_trans_trigger:
                 message['content'] = message['content'].replace(no_trans_trigger, '')
+            if trans_trigger:
+                message['content'] = message['content'].replace(trans_trigger, '')
             filtered_messages.append(message)
         else:
             assistant = re.search(f'(?<={a_answer})[\w\W]+?{re_end}', message['content'])
@@ -154,14 +157,18 @@ def filter_messages_and_trigger(messages):  # 用于不翻译的信息
 
 def has_no_trans_trigger(messages):  # 判断是否不要翻译
     no_trans_trigger = get_global_config()['filter']['no_trans_trigger']
-    if not no_trans_trigger:
+    trans_trigger = get_global_config()['filter']['trans_trigger']
+    if not (no_trans_trigger or trans_trigger):
         return False
+    has_trans_trigger = False  # 是否至少有一个对话有触发器
     for message in messages:
         if message['role'] == 'assistant':
             continue
-        if no_trans_trigger in message['content']:
+        if no_trans_trigger and no_trans_trigger in message['content']:
             return True
-    return False
+        if trans_trigger in message['content']:
+            has_trans_trigger = True
+    return not has_trans_trigger
 
 
 def generate_stream_response_start(id_str, model_name='gpt-3.5-turbo'):

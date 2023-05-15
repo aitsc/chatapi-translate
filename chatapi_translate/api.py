@@ -77,6 +77,9 @@ async def completions(request: Request):
             question = message['content'] + '\n\n' + question
         else:
             break
+    trans_trigger = get_global_config()['filter']['trans_trigger']
+    if trans_trigger:
+        question = question.replace(trans_trigger, '')
     question = question.strip()
     if not question:  # 没有问题
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "No Question Found")
