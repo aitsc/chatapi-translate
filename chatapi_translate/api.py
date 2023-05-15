@@ -72,7 +72,9 @@ async def completions(request: Request):
     question = ''
     for message in body["messages"][::-1]:
         if message['role'] == 'user':
-            question += message['content'] + '\n'  # 合并所有连续问题
+            question = message['content'] + '\n' + question  # 合并所有连续问题
+        elif message['role'] == 'system':
+            question = message['content'] + '\n\n' + question
         else:
             break
     question = question.strip()
