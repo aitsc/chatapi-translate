@@ -58,7 +58,7 @@ async def completions(request: Request):
                 client_stream = client.stream("POST", url, headers=headers, json=body, timeout=360)
                 return EventSourceResponse(response_stream(client_stream), ping=10000)
             else:
-                response = await client.post(url, headers=headers, json=body)
+                response = await client.post(url, headers=headers, json=body, timeout=120)
                 return Response(
                     response.content,
                     status_code=response.status_code,
