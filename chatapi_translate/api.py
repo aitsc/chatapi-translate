@@ -174,4 +174,8 @@ def main():
         print('需要用 --config 命令行参数指定存在的配置文件路径!\n样例模版请参考: https://github.com/aitsc/chatapi-translate/blob/master/config_example.jsonc')
         return
     get_global_config(args.config)
-    uvicorn.run(app, host=args.host, port=args.port)
+    
+    log_config = uvicorn.config.LOGGING_CONFIG
+    log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
+    log_config["formatters"]["default"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
+    uvicorn.run(app, host=args.host, port=args.port, log_config=log_config)
